@@ -21,9 +21,9 @@ import lombok.AllArgsConstructor;
 public class DatabaseSeeder implements CommandLineRunner {
 
   private LemonadeRepository lemonadeRepository;
-  // private OrderRepository orderRepository;
-  // private CustomerRepository customerRepository;
-  // private LemonadeStandRepository lemonadeStandRepository;
+  private OrderRepository orderRepository;
+  private CustomerRepository customerRepository;
+  private LemonadeStandRepository lemonadeStandRepository;
 
   @Override
   public void run(String... args) throws Exception {
@@ -34,26 +34,25 @@ public class DatabaseSeeder implements CommandLineRunner {
     lemonade.setIceCubes(5);
     lemonade.setPrice(4.50);
 
-    // Customer customer1 = new Customer();
-    // customer1.setName("Alec");
-    // customer1.setPhoneNumber("1234567890");
+    Order order = new Order();
+    order.setLemonades(List.of(lemonade));
+    order.setTotal(4.50);
+    
+    Customer customer1 = new Customer();
+    customer1.setName("Alec");
+    customer1.setPhoneNumber("1234567890");
+    customer1.setOrder(List.of(order));
 
-    // LemonadeStand lemonadeStand = new LemonadeStand();
-    // lemonadeStand.setName("Halie's Lemonades");
-
-
-    // Order order = new Order();
-    // order.setCustomer(customer1);
-    // order.setLemonadeStand(lemonadeStand);
-    // order.setLemonades(List.of(lemonade));
-    // order.setTotal(lemonade.getPrice());
+    LemonadeStand lemonadeStand = new LemonadeStand();
+    lemonadeStand.setName("Halie's Lemonades");
+    lemonadeStand.setOrders(List.of(order));
 
     lemonadeRepository.saveAndFlush(lemonade);
-    // lemonadeStandRepository.saveAndFlush(lemonadeStand);
-    // customerRepository.saveAndFlush(customer1);
-    // orderRepository.saveAndFlush(order);
+    orderRepository.saveAndFlush(order);
+    lemonadeStandRepository.saveAndFlush(lemonadeStand);
+    customerRepository.saveAndFlush(customer1);
 
-    System.out.println(lemonadeRepository.findAll());
+    // System.out.println(lemonadeRepository.findAll());
     // System.out.println(orderRepository.findAll());
     // System.out.println(customerRepository.findAll());
     // System.out.println(lemonadeStandRepository.findAll());
