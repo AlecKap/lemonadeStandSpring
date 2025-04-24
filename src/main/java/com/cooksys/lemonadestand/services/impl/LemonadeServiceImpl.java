@@ -2,6 +2,10 @@ package com.cooksys.lemonadestand.services.impl;
 
 import java.util.List;
 
+import java.util.Optional;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.cooksys.lemonadestand.entities.Lemonade;
@@ -26,18 +30,28 @@ public class LemonadeServiceImpl implements LemonadeService {
   }
 
   @Override
-  public LemonadeResponseDto createLemonade(LemonadeRequestDto lemonadeRequestDto) {
+  public ResponseEntity<LemonadeResponseDto> createLemonade(LemonadeRequestDto lemonadeRequestDto) {
     // Map request dto to a lemonade entity
+    if (lemonadeRequestDto.getLemonJuice() == null || lemonadeRequestDto.getWater() == null
+        || lemonadeRequestDto.getSugar() == null || lemonadeRequestDto.getIceCubes() == null) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
     Lemonade lemonadeToSave = lemonadeMapper.requestDtoEntity(lemonadeRequestDto);
-    lemonadeToSave.setPrice(lemonadeToSave.getLemonJuice() * .20 + lemonadeToSave.getWater() * .01 + lemonadeToSave.getSugar() * .15 + lemonadeToSave.getIceCubes() * .05 + .50);
-    
+    lemonadeToSave.setPrice(lemonadeToSave.getLemonJuice() * .20 + lemonadeToSave.getWater() * .01
+        + lemonadeToSave.getSugar() * .15 + lemonadeToSave.getIceCubes() * .05 + .50);
+
     // Save the new lemonade entity
     // Map newly saved entity with the generated id to a response dto and return it
-    return lemonadeMapper.entityToResponseDto(lemonadeRepository.saveAndFlush(lemonadeToSave));
+    return new ResponseEntity<>(lemonadeMapper.entityToResponseDto(lemonadeRepository.saveAndFlush(lemonadeToSave)),
+        HttpStatus.OK);
   }
 
   @Override
-  public LemonadeResponseDto getLemonadeById(Long id) {
-    return lemonadeMapper.entityToResponseDto(lemonadeRepository.getOne(id));
+  public ResponseEntity<LemonadeResponseDto> getLemonadeById(Long id) {
+    Optional<Lemonade> optionalLemonade = lemonadeRepository.findById(id);
+    if (optionalLemonade.isEmpty()) {
+      return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    }
+    return new ResponseEntity<>(lemonadeMapper.entityToResponseDto(optionalLemonade.get()), HttpStatus.OK);
   }
 }
