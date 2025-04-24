@@ -35,7 +35,6 @@ public class DatabaseSeeder implements CommandLineRunner {
     lemonade.setPrice(4.50);
 
     Order order = new Order();
-    order.setLemonades(List.of(lemonade));
     order.setTotal(4.50);
     
     Customer customer1 = new Customer();
