@@ -12,4 +12,8 @@ public interface LemonadeService {
   LemonadeResponseDto createLemonade(LemonadeRequestDto lemonadeRequestDto);
 
   LemonadeResponseDto getLemonadeById(Long id);
+
+  LemonadeResponseDto updateLemonade(Long id, LemonadeRequestDto lemonadeRequestDto);
+
+  LemonadeResponseDto deleteLemonade(Long id);
 }
