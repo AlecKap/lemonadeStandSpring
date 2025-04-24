@@ -35,4 +35,9 @@ public class LemonadeServiceImpl implements LemonadeService {
     // Map newly saved entity with the generated id to a response dto and return it
     return lemonadeMapper.entityToResponseDto(lemonadeRepository.saveAndFlush(lemonadeToSave));
   }
+
+  @Override
+  public LemonadeResponseDto getLemonadeById(Long id) {
+    return lemonadeMapper.entityToResponseDto(lemonadeRepository.getOne(id));
+  }
 }
