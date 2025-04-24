@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cooksys.lemonadestand.entities.Lemonade;
+import com.cooksys.lemonadestand.model.LemonadeRequestDto;
+import com.cooksys.lemonadestand.model.LemonadeResponseDto;
 import com.cooksys.lemonadestand.services.LemonadeService;
 
 import lombok.AllArgsConstructor;
@@ -21,12 +22,12 @@ public class LemonadeController {
   private LemonadeService lemonadeService;
   
   @GetMapping
-  public List<Lemonade> getAllLemonades() {
+  public List<LemonadeResponseDto> getAllLemonades() {
     return lemonadeService.getAllLemonades();
   }
 
   @PostMapping
-  public Lemonade createLemonade(@RequestBody Lemonade lemonade) {
-    return lemonadeService.createLemonade(lemonade);
+  public LemonadeResponseDto createLemonade(@RequestBody LemonadeRequestDto lemonadeRequestDto) {
+    return lemonadeService.createLemonade(lemonadeRequestDto);
   }
 }
