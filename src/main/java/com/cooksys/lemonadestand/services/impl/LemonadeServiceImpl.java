@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.cooksys.lemonadestand.entities.Lemonade;
+import com.cooksys.lemonadestand.exceptions.BadRequestException;
+import com.cooksys.lemonadestand.exceptions.NotFoundException;
 import com.cooksys.lemonadestand.mappers.LemonadeMapper;
 import com.cooksys.lemonadestand.model.LemonadeRequestDto;
 import com.cooksys.lemonadestand.model.LemonadeResponseDto;
@@ -30,11 +32,11 @@ public class LemonadeServiceImpl implements LemonadeService {
   }
 
   @Override
-  public ResponseEntity<LemonadeResponseDto> createLemonade(LemonadeRequestDto lemonadeRequestDto) {
+  public LemonadeResponseDto createLemonade(LemonadeRequestDto lemonadeRequestDto) {
     // Map request dto to a lemonade entity
     if (lemonadeRequestDto.getLemonJuice() == null || lemonadeRequestDto.getWater() == null
         || lemonadeRequestDto.getSugar() == null || lemonadeRequestDto.getIceCubes() == null) {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      throw new BadRequestException("All fields are required to creat Lemonade Object");
     }
     Lemonade lemonadeToSave = lemonadeMapper.requestDtoEntity(lemonadeRequestDto);
     lemonadeToSave.setPrice(lemonadeToSave.getLemonJuice() * .20 + lemonadeToSave.getWater() * .01
@@ -42,16 +44,15 @@ public class LemonadeServiceImpl implements LemonadeService {
 
     // Save the new lemonade entity
     // Map newly saved entity with the generated id to a response dto and return it
-    return new ResponseEntity<>(lemonadeMapper.entityToResponseDto(lemonadeRepository.saveAndFlush(lemonadeToSave)),
-        HttpStatus.OK);
+    return lemonadeMapper.entityToResponseDto(lemonadeRepository.saveAndFlush(lemonadeToSave));
   }
 
   @Override
-  public ResponseEntity<LemonadeResponseDto> getLemonadeById(Long id) {
+  public LemonadeResponseDto getLemonadeById(Long id) {
     Optional<Lemonade> optionalLemonade = lemonadeRepository.findById(id);
     if (optionalLemonade.isEmpty()) {
-      return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+      throw new NotFoundException("No Lemonade found with id: " + id + ".");
     }
-    return new ResponseEntity<>(lemonadeMapper.entityToResponseDto(optionalLemonade.get()), HttpStatus.OK);
+    return lemonadeMapper.entityToResponseDto(optionalLemonade.get());
   }
 }
