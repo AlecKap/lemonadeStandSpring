@@ -31,16 +31,33 @@ public class LemonadeServiceImpl implements LemonadeService {
     return lemonadeMapper.entityToResponseDto(lemonadeRepository.findAll());
   }
 
+  private void setLemonadePrice(Lemonade lemonade) {
+    lemonade.setPrice(lemonade.getLemonJuice() * .20 + lemonade.getWater() * .01
+        + lemonade.getSugar() * .15 + lemonade.getIceCubes() * .05 + .50);
+  }
+
+  private void validateLemonadeRequest(LemonadeRequestDto lemonadeRequestDto) {
+    if (lemonadeRequestDto.getLemonJuice() == null || lemonadeRequestDto.getWater() == null
+        || lemonadeRequestDto.getSugar() == null || lemonadeRequestDto.getIceCubes() == null) {
+      throw new BadRequestException("All fields are required on a Lemonade request dto.");
+    }
+  }
+
+  private Lemonade getLemonade(Long id) {
+    Optional<Lemonade> optionalLemonade = lemonadeRepository.findById(id);
+    if (optionalLemonade.isEmpty()) {
+      throw new NotFoundException("No Lemonade found with id: " + id + ".");
+    }
+
+    return optionalLemonade.get();
+  }
+
   @Override
   public LemonadeResponseDto createLemonade(LemonadeRequestDto lemonadeRequestDto) {
     // Map request dto to a lemonade entity
-    if (lemonadeRequestDto.getLemonJuice() == null || lemonadeRequestDto.getWater() == null
-        || lemonadeRequestDto.getSugar() == null || lemonadeRequestDto.getIceCubes() == null) {
-      throw new BadRequestException("All fields are required to creat Lemonade Object");
-    }
+    validateLemonadeRequest(lemonadeRequestDto);
     Lemonade lemonadeToSave = lemonadeMapper.requestDtoEntity(lemonadeRequestDto);
-    lemonadeToSave.setPrice(lemonadeToSave.getLemonJuice() * .20 + lemonadeToSave.getWater() * .01
-        + lemonadeToSave.getSugar() * .15 + lemonadeToSave.getIceCubes() * .05 + .50);
+    setLemonadePrice(lemonadeToSave);
 
     // Save the new lemonade entity
     // Map newly saved entity with the generated id to a response dto and return it
@@ -49,10 +66,28 @@ public class LemonadeServiceImpl implements LemonadeService {
 
   @Override
   public LemonadeResponseDto getLemonadeById(Long id) {
-    Optional<Lemonade> optionalLemonade = lemonadeRepository.findById(id);
-    if (optionalLemonade.isEmpty()) {
-      throw new NotFoundException("No Lemonade found with id: " + id + ".");
-    }
-    return lemonadeMapper.entityToResponseDto(optionalLemonade.get());
+    return lemonadeMapper.entityToResponseDto(getLemonade(id));
+  }
+
+  @Override
+  public LemonadeResponseDto updateLemonade(Long id, LemonadeRequestDto lemonadeRequestDto) {
+    validateLemonadeRequest(lemonadeRequestDto);
+
+    // Lemonade lemonadeToUpdate = lemonadeMapper.requestDtoEntity(lemonadeRequestDto);
+    Lemonade lemonadeToUpdate = getLemonade(id);
+    lemonadeToUpdate.setIceCubes(lemonadeRequestDto.getIceCubes());
+    lemonadeToUpdate.setWater(lemonadeRequestDto.getWater());
+    lemonadeToUpdate.setSugar(lemonadeRequestDto.getSugar());
+    lemonadeToUpdate.setLemonJuice(lemonadeRequestDto.getLemonJuice());
+    setLemonadePrice(lemonadeToUpdate);
+
+    return lemonadeMapper.entityToResponseDto(lemonadeRepository.saveAndFlush(lemonadeToUpdate));
+  }
+
+  @Override
+  public LemonadeResponseDto deleteLemonade(Long id) {
+    Lemonade lemonadeToDelete = getLemonade(id);
+    lemonadeRepository.delete(lemonadeToDelete);
+    return lemonadeMapper.entityToResponseDto(lemonadeToDelete);
   }
 }
